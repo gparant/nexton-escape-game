@@ -39,29 +39,41 @@ WA.onInit().then(() => {
 
     WA.room.onEnterLayer("cigarette").subscribe(() => {
         if (WA.state.CigaretteVisible) {
-            currentPopup = WA.ui.openPopup("cigarettePopup", "Une cigarette laissée par terre. Il y a une poubelle pour ça, mais cette personne était visiblement pressée 😠", [])
-            cigaretteFound = true
-            WA.state.CigaretteVisible = false
+            currentPopup = WA.ui.openPopup("cigarettePopup", "Une cigarette laissée par terre. Il y a une poubelle pour ça, mais cette personne était visiblement pressée 😠\n Où ce trouve cette poubelle...", [
+                {
+                    label: 'Prendre',
+                    className: 'primary',
+                    callback: () => {
+                        cigaretteFound = true;
+                        WA.state.CigaretteVisible = false;
+                        closePopup();
+                    },
+                }
+            ]);
         }
     })
     WA.room.onLeaveLayer("cigarette").subscribe(closePopup)
 
     WA.room.area.onEnter("garbageCan").subscribe(() => {
         if (cigaretteFound && !WA.state.CigaretteComplete) {
-            currentPopup = WA.ui.openPopup("garbageCanPopup", "Vous avez jeté la cigarette à la poubelle et validé votre première action écologique 🌍. Merci 🫶", [])
+            currentPopup = WA.ui.openPopup("garbageCanPopup", "Vous avez jeté la cigarette à la poubelle et validé votre première action écologique 🌍.\n Merci 🫶", [])
             WA.state.CigaretteComplete = true
         }
     })
     WA.room.area.onLeave("garbageCan").subscribe(closePopup)
 
     WA.room.area.onEnter("info").subscribe(() => {
-        currentPopup = WA.ui.openPopup("infoPopup", "Le but est d'entrer tous ensemble dans le train n°1 et de le démarrer afin de s'échapper ! La porte ne peut être ouverte que si vous avez réussi toutes les énigmes. Bonne chance 💪", [])
+        currentPopup = WA.ui.openPopup("infoPopup", "Le but est d'entrer tous ensemble dans le train n°1 et de le démarrer afin de s'échapper !\nLa porte ne peut être ouverte que si vous avez réussi toutes les énigmes. Bonne chance 💪", [])
     })
     WA.room.area.onLeave("info").subscribe(closePopup)
 
     WA.room.area.onEnter("game").subscribe(() => {
-        currentPopup = WA.ui.openPopup("gamePopup", "Le morpion... Pensez-vous pourvoir gagner contre nous ? 😈", []);
-        WA.state.TicTacToeStarted = true
+        if(WA.state.TicTacToeComplete) {
+            currentPopup = WA.ui.openPopup("gamePopup", "Pas mal... Je dois avoué que vous êtes plutôt doué 🤔", []);
+        }else{
+            currentPopup = WA.ui.openPopup("gamePopup", "Le morpion... Pensez-vous pourvoir gagner contre nous ? 😈", []);
+            WA.state.TicTacToeStarted = true;
+        }
     })
     WA.room.area.onLeave("game").subscribe(closePopup)
 
@@ -118,7 +130,7 @@ WA.onInit().then(() => {
                 WA.state.TrainDoorOpen = true;
                 WA.state.GameState = "room2";
             } else {
-                WA.chat.sendChatMessage("Aïe, détective n'est pas votre qualité première... je me trompe ? Malheureusement, vous devez tout reprendre depuis le début 😪", "KindRobot000")
+                WA.chat.sendChatMessage("Aïe, détective n'est pas votre qualité première... je me trompe ?\nMalheureusement, vous devez tout reprendre depuis le début 😪", "KindRobot000")
                 WA.state.TicTacToeStarted = false
                 WA.state.TicTacToePlay1 = false
                 WA.state.TicTacToePlay2 = false
@@ -182,7 +194,16 @@ WA.onInit().then(() => {
         // anti-cheat
         if (!WA.state.TrainDoorOpen) {
             WA.controls.disablePlayerControls()
-            currentPopup = WA.ui.openPopup("driverCabinePopup", cheatWarning, [])
+            currentPopup = WA.ui.openPopup("driverCabinePopup", cheatWarning, [
+                {
+                    label: 'Teleport',
+                    className: 'primary',
+                    callback: () => {
+                        closePopup();
+                        WA.nav.goToRoom("#start");
+                    }
+                }
+            ]);
         }
     })
 
@@ -242,7 +263,16 @@ WA.onInit().then(() => {
         // anti-cheat
         if (!WA.state.TrainStarted) {
             WA.controls.disablePlayerControls()
-            currentPopup = WA.ui.openPopup("room3Popup", cheatWarning, [])
+            currentPopup = WA.ui.openPopup("room3Popup", cheatWarning, [
+                {
+                    label: 'Teleport',
+                    className: 'primary',
+                    callback: () => {
+                        closePopup();
+                        WA.nav.goToRoom("#start");
+                    }
+                }
+            ]);
         }
     })
     WA.room.onLeaveLayer("max-maulwurf").subscribe(closePopup)
@@ -254,7 +284,7 @@ WA.onInit().then(() => {
 
     WA.room.area.onEnter("room3bot").subscribe(() => {
         if (WA.state.isMaxHappy) return
-        currentPopup = WA.ui.openPopup("room3botPopup", "Stranger, it seems your beloved Max Maulwurf is hungry. You will be blocked here until you comfort him. " + clueWarning, [
+        currentPopup = WA.ui.openPopup("room3botPopup", "Étranger, il semble que votre bien-aimé Max Maulwurf ait faim. Vous serez bloqué ici jusqu'à ce que vous le réconfortiez.\n" + clueWarning, [
             {
                 label: 'Give me a clue',
                 className: 'primary',
@@ -265,20 +295,47 @@ WA.onInit().then(() => {
     WA.room.area.onLeave("room3bot").subscribe(closePopup)
 
     WA.room.area.onEnter("room3helmet").subscribe(() => {
-        currentPopup = WA.ui.openPopup("room3helmetPopup", "Vous avez trouvé le casque de travail jaune ! Cela devrait aider à calmer Max Maulwurf 🪖", [])
-        WA.state.helmetFound = true
+        if(WA.state.helmetFound) return;
+        currentPopup = WA.ui.openPopup("room3helmetPopup", "Vous avez trouvé le casque de travail jaune ! Cela devrait aider à calmer Max Maulwurf 🪖", [
+            {
+                label: 'Prendre',
+                className: 'primary',
+                callback: () => {
+                    WA.state.helmetFound = true;
+                    closePopup();
+                },
+            }
+        ]);
     })
     WA.room.area.onLeave("room3helmet").subscribe(closePopup)
 
     WA.room.area.onEnter("room3DBtrophy").subscribe(() => {
-        currentPopup = WA.ui.openPopup("room3DBtrophyPopup", "Génial, vous avez trouvé le trophé Nexton ! Cela devrait calmer Max You Maulwurf 🏆", [])
-        WA.state.DBtrophyFound = true
+        if(WA.state.DBtrophyFound) return;
+        currentPopup = WA.ui.openPopup("room3DBtrophyPopup", "Génial, vous avez trouvé le trophé Nexton ! Cela devrait calmer Max You Maulwurf 🏆", [
+            {
+                label: 'Prendre',
+                className: 'primary',
+                callback: () => {
+                    WA.state.DBtrophyFound = true;
+                    closePopup();
+                },
+            }
+        ]);
     })
     WA.room.area.onLeave("room3DBtrophy").subscribe(closePopup)
 
     WA.room.area.onEnter("room3WAmug").subscribe(() => {
-        currentPopup = WA.ui.openPopup("room3WAmugPopup", "Vous avez trouvé la tasse à café WorkAdventure ! Cela devrait aider à calmer Max Maulwurf ☕", [])
-        WA.state.WAmugFound = true
+        if(WA.state.WAmugFound) return;
+        currentPopup = WA.ui.openPopup("room3WAmugPopup", "Vous avez trouvé la tasse à café WorkAdventure ! Cela devrait aider à calmer Max Maulwurf ☕", [
+            {
+                label: 'Prendre',
+                className: 'primary',
+                callback: () => {
+                    WA.state.WAmugFound = true;
+                    closePopup();
+                },
+            }
+        ]);
     })
     WA.room.area.onLeave("room3WAmug").subscribe(closePopup)
 
@@ -288,13 +345,12 @@ WA.onInit().then(() => {
         } else if (WA.state.WAmugFound && WA.state.helmetFound && WA.state.DBtrophyFound) {
             WA.room.hideLayer("maxHungry")
             WA.room.showLayer("maxHappy")
-            currentPopup = WA.ui.openPopup("maxMaulwurfPopup", "Vous donnez les 3 objets à Max. Après avoir reçu tous les objets, il se calme et fait une pause en regardant son casque bien-aimé. "
+            currentPopup = WA.ui.openPopup("maxMaulwurfPopup", "Vous avez donné les 3 objets à Max. Après avoir reçu tous les objets, il se calme et fait une pause en regardant son casque bien-aimé. "
             + "Il se souvient de son passage à la Nexton : sa tâche principale était d'informer sur la construction et les réparations... "
-            + "Il s'excuse et accepte d'allumer l'alimentation électrique. Dépêchez-vous et redémarrez le système de contrôle de la circulation des trains au terminal pour éviter de nouveaux retards ! ", [])
-            WA.state.isMaxHappy = true
+            + "Il s'excuse et accepte d'allumer l'alimentation électrique.\n\rDépêchez-vous et redémarrez le système de contrôle de la circulation des trains au terminal pour éviter de nouveaux retards !", []);
+            WA.state.isMaxHappy = true;
         } else {
-            currentPopup = WA.ui.openPopup("maxMaulwurfPopup", "Max a l'air affamé... on dirait que c'est lui qui a causé les dégâts dans la centrale électrique "
-            + "parce qu'il est fou de ne plus être la mascotte des chemins de fer.", [])
+            currentPopup = WA.ui.openPopup("maxMaulwurfPopup", "Max a l'air affamé... on dirait que c'est lui qui a causé les dégâts dans la centrale électrique parce qu'il est triste de ne plus être la mascotte des chemins de fer.", []);
         }
     })
     WA.room.area.onLeave("maxMaulwurf").subscribe(closePopup)
@@ -310,7 +366,7 @@ WA.onInit().then(() => {
                         className: 'primary',
                         callback: () => restartPower(),
                     }
-                ])
+                ]);
             }
         } else {
             currentPopup = WA.ui.openPopup("terminalPopup", "C'est le terminal... mais il est hors service ⛔", [])
@@ -341,6 +397,8 @@ WA.onInit().then(() => {
 
         WA.state.onVariableChange('TicTacToeComplete').subscribe((value) => {
             if (value === true) {
+                closePopup();
+                currentPopup = WA.ui.openPopup("gamePopup", "Pas mal... Je dois avoué que vous êtes plutôt doué 🤔", []);
                 WA.state.QuestionReady = WA.state.CigaretteComplete;
             }
         })
@@ -360,7 +418,8 @@ WA.onInit().then(() => {
 }).catch(e => console.error(e));
 
 function openStartPopup() {
-    currentPopup = WA.ui.openPopup("startPopup", "Vous venez d'atterrir dans une gare abandonnée. En cliquant sur le bouton 'C'est parti !', le chronomètre de 20 minutes démarre. Votre mission, trouver et résoudre toutes les énigmes présentes danc cette gare. Bon chance... 🚀", [
+    closePopup();
+    currentPopup = WA.ui.openPopup("startPopup", "Vous venez d'atterrir dans une gare abandonnée. En cliquant sur le bouton 'C'est parti !', le chronomètre de 20 minutes démarre.\nVotre mission, trouver et résoudre toutes les énigmes présentes danc cette gare. Bon chance... 🚀", [
        {
            label: "C'est parti !",
            className: 'error',
@@ -374,7 +433,8 @@ function openStartPopup() {
 }
 
 function closePopup(){
-    if (currentPopup !== undefined) {
+    console.trace('currentPopup', currentPopup);
+    if (currentPopup != undefined) {
         currentPopup.close();
         currentPopup = undefined;
     }
@@ -402,9 +462,16 @@ function giveClue(roomNumber: number){
 }
 
 function restartPower(){
-    closePopup()
-    WA.state.powerRestarted = true
-    WA.nav.openCoWebSite(WA.state.formURL as string)
+    closePopup();
+    WA.state.powerRestarted = true;
+    WA.nav.openCoWebSite(WA.state.formURL as string);
+    currentPopup = WA.ui.openPopup("terminalPopup", "Un grand mercie d'avoir réparé la gare 😍", [
+        {
+            label: 'Fermer',
+            className: 'primary',
+            callback: () => closePopup(),
+        }
+    ]);
 }
 
 export {};
