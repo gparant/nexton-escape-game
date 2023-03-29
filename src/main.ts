@@ -1,8 +1,7 @@
 /// <reference types="@workadventure/iframe-api-typings" />
-
 import { bootstrapExtra } from "@workadventure/scripting-api-extra";
-import { CreateUIWebsiteEvent } from "@workadventure/iframe-api-typings/Api/Events/Ui/UIWebsite";
-
+import { ButtonDescriptor } from "@workadventure/iframe-api-typings";
+import { CreateUIWebsiteEvent } from "@workadventure/iframe-api-typings/front/Api/Events/Ui/UIWebsite";
 import "./button/GroupMeeting";
 
 console.log('Script started successfully');
@@ -17,7 +16,7 @@ WA.onInit().then(() => {
     const mapUrl = WA.room.mapURL;
     const root = mapUrl.substring(0, mapUrl.lastIndexOf("/"))
 
-    const information: CreateUIWebsiteEvent = {
+    const information : CreateUIWebsiteEvent = {
         url:  root + "/information.html",
         visible: true,
         allowApi: true,
