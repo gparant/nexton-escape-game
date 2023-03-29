@@ -48,7 +48,7 @@ WA.onInit().then(() => {
 
     WA.room.area.onEnter("garbageCan").subscribe(() => {
         if (cigaretteFound && !WA.state.CigaretteComplete) {
-            currentPopup = WA.ui.openPopup("garbageCanPopup", "Vous pouvez jetez la cigarette à la poubelle pour valider votre première action écologique 🌍. Merci 🫶", [])
+            currentPopup = WA.ui.openPopup("garbageCanPopup", "Vous avez jeté la cigarette à la poubelle et validé votre première action écologique 🌍. Merci 🫶", [])
             WA.state.CigaretteComplete = true
         }
     })
@@ -67,15 +67,23 @@ WA.onInit().then(() => {
 
     WA.room.onEnterLayer("tic-tac-toe").subscribe(() => {
         if (WA.state.TicTacToeStarted) {
-            WA.state.TicTacToeOngoing = true
             WA.room.setProperty("tic-tac-toe", "silent", true)
 
         }
     })
-    WA.room.onLeaveLayer("tic-tac-toe").subscribe(() => {
-        if (!WA.state.TicTacToeComplete) {
-            WA.state.TicTacToeOngoing = false
-        }
+
+    WA.room.onLeaveLayer("tic-tac-toe-ongoing-1").subscribe(() => {
+        WA.room.hideLayer("tic-tac-toe-ongoing-1");
+    })
+    WA.room.onEnterLayer("tic-tac-toe-ongoing-1").subscribe(() => {
+        WA.room.showLayer("tic-tac-toe-ongoing-1");
+    })
+
+    WA.room.onLeaveLayer("tic-tac-toe-ongoing-2").subscribe(() => {
+        WA.room.hideLayer("tic-tac-toe-ongoing-2");
+    })
+    WA.room.onEnterLayer("tic-tac-toe-ongoing-2").subscribe(() => {
+        WA.room.showLayer("tic-tac-toe-ongoing-2");
     })
 
     WA.room.onEnterLayer("tic-tac-toe-play1").subscribe(() => {
@@ -112,7 +120,6 @@ WA.onInit().then(() => {
             } else {
                 WA.chat.sendChatMessage("Aïe, détective n'est pas votre qualité première... je me trompe ? Malheureusement, vous devez tout reprendre depuis le début 😪", "KindRobot000")
                 WA.state.TicTacToeStarted = false
-                WA.state.TicTacToeOngoing = false
                 WA.state.TicTacToePlay1 = false
                 WA.state.TicTacToePlay2 = false
                 WA.state.TicTacToeComplete = false
